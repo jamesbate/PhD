@@ -1,0 +1,42 @@
+Model 
+
+For my fitting function I use an incoherent sum of rabi frequencies coupling between each relavent motional state 
+
+[latex]\Omega_{n+m,n} = \Omega_0\bra{n+m}e^{i\eta (a + \dag{a})}\ket{n}[/latex] 
+[latex]= \Omega_0e^{-\eta^2/2}\eta^{|m|}L_{n_<}^{|m|}(\eta^2)\sqrt{\frac{n_<!}{n_>!}}[/latex] 
+
+where [latex]\eta[/latex] is the dicke factor, given by [latex]\eta = k\cos{\phi}\sqrt{\frac{\hbar}{2m\omega}}[/latex]. I assume an axial frequency of [latex]\omega \sim 2*\pi*1[/latex]MHz. Since the 729 beam is at an angle [latex]\phi = 45^0[/latex] to the oscillation axis, this gives a dicke factor of 0.068. 
+
+This sum has the form  
+
+[latex]P_D(t) = \sum_n{\rho_{n,n}\cos{\Omega_{n+m,n}t}}[/latex] 
+
+I assume the ions to be in a thermal state
+
+[latex]\rho_{n,n}(\langle n\rangle) = \frac{1}{\langle n\rangle}(\frac{\langle n\rangle}{\langle n\rangle + 1})^n[/latex] 
+
+I terminate the sum at 100 for my fitting function. Here is how my filling function compares to the Lamb-Dicke approximation
+
+
+Carrier flops 
+
+It was realised that the state was not properly optically pumped for the Rabi flop data. This results Rabi flops with reduced amplitude. I ignore errors the flourescent detection , so the ion can be characterised by two states [latex]\ket{b}, \ket{d}[/latex] for bright and dark. Then, we have 
+
+[latex]\rho = A|b><b| + (1-A)\rho_{rabi}[/latex] 
+
+which gives
+
+[latex]\bra{d}\rho\ket{d} = (1-A)\sin^2{\Omega t/2}[/latex] 
+
+We can see the amplitude factor is given by 1-A, i.e. the probability of being in the [latex]m_s = -1/2[/latex] state before the 729 pulse is applied, as we would expect. 
+
+[latex]
+\rho = 
+
+[/latex] 
+
+RSB flops 
+
+BSB flops 
+
+Temperature vs Raman pulse number

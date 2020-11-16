@@ -38,7 +38,7 @@ detuned_rabi_factor = lambda rabi_dicke, detuning: rabi_dicke/np.sqrt(rabi_dicke
 
 pc = PhysicalConstants()
 
-def full_Rabi(t, p, sum_limit = 500, p_fix = [None,None,None,None,None], m = 0):
+def full_Rabi(t, p, sum_limit = 100, p_fix = [None,None,None,None,None], m = 0):
 	#m represents sideband, DO NOT USE ABOVE 3
 	if m > 3: 
 		raise ValueError('fix full_rabi_dicke before m > 3')
@@ -52,6 +52,9 @@ def full_Rabi(t, p, sum_limit = 500, p_fix = [None,None,None,None,None], m = 0):
 			p_count += 1
 
 	[dicke_factor, n_av, detuning, Rabi, phase] = p_temp
+	if n_av < 0:
+		return 0
+        #unphysical
 
 	ret = 0
 
@@ -79,7 +82,7 @@ def COM_freq(lamb_dicke):
 	return (pc.h_bar*k**2/(2*np.pi*2*2*pc.m_calc*lamb_dicke**2))
 
 
-def rabi_fitter(phase, probs, errors, initial_fit, labels = None, p_fix = [None,None,None,None,None],m = 0):
+def rabi_fitter(phase, probs, errors, initial_fit, labels = None, p_fix = [None,None,None,None,None],m = 0, ax = None, color = None):
 	"""This function takes raw rabi data, calculates error bars, fits a dambed
 	sinusoid, and creates a plot figure. It returns fitting parameters.
 	Parameters
@@ -103,7 +106,8 @@ def rabi_fitter(phase, probs, errors, initial_fit, labels = None, p_fix = [None,
 	"""
 	plt.rcParams.update({'font.size': 16})
 	colours = ['b','m','c','r','tab:orange', 'tab:pink']
-	fig, ax = plt.subplots(1	,1, constrained_layout=True, figsize=(18, 9))
+	if ax is None:
+		fig, ax = plt.subplots(1	,1, constrained_layout=True, figsize=(18, 9))
 	plt.grid()
 	#figure settings
 
@@ -121,43 +125,55 @@ def rabi_fitter(phase, probs, errors, initial_fit, labels = None, p_fix = [None,
 			return np.sum((full_Rabi(phase, p, p_fix = p_fix[i], m = m) - probs[:,i])**2)
 		#define least squares metric to minimize
 
-		ax.scatter(phase, probs[:,i], c = colours[i], label = labels[i])
+		if color is not None:
+			ax.scatter(phase, probs[:,i], label = labels[i], color = color[i])
+			if errors[:,i][0] is not None:
+				ax.errorbar(phase, probs[:,i], errors[:,i], ls = 'none', c = color[i], capsize = 3)
+		else:
+			ax.scatter(phase, probs[:,i], c = colours[i], label = labels[i])
+			if errors[:,i][0] is not None:
+				ax.errorbar(phase, probs[:,i], errors[:,i], ls = 'none', c = colours[i], capsize = 3)
 
 		#calculate projection noise
-		ax.errorbar(phase, probs[:,i], errors[:,i], ls = 'none', c = colours[i], capsize = 3)
+
+
 		#plot errorbars
-
+		
 		opt_params = [initial_fit[i][j] for j in range(len(initial_fit[i])) if p_fix[i][j] is None]
-
-		res = minimize(func_to_minimise, x0 = opt_params)
+		print('Starting minimisation', i, '...')
+		res = minimize(func_to_minimise, x0 = opt_params, options ={'ftol' : 2.220446049250313e-09})
+		print('Finished minimisation', i)
 		#fit function with errors
 
 		ftol = 2.220446049250313e-09
+		#default tolerance 
 		tmp_i = np.zeros(len(res.x))
-		for i in range(len(res.x)):
-			tmp_i[i] = 1.0
-			hess_inv_i = res.hess_inv.dot(tmp_i)[i]
-			uncertainty_i = np.sqrt(max(1, abs(res.fun)) * ftol * hess_inv_i)
-			tmp_i[i] = 0.0
-			print('x^{0} = {1:12.4e} ± {2:.1e}'.format(i, res.x[i], uncertainty_i))
-		exit()
+		uncertainty = np.zeros(len(res.x))
+		for k in range(len(res.x)):
+			tmp_i[k] = 1.0
+			hess_inv_i = res.hess_inv.dot(tmp_i)[k]
+			uncertainty[k] = np.sqrt(max(1, abs(res.fun)) * ftol * hess_inv_i)
+			tmp_i[k] = 0.0
 
 		#now append full set of parameters again 
 		final_result = [] 
 		res_count = 0
 		for j in range(len(initial_fit[i])):
 			if p_fix[i][j] is None:
-				final_result.append(res.x[res_count])
+				final_result.append([res.x[res_count], uncertainty, full_Rabi(phase, res.x, p_fix = p_fix[i], m = m)])
 				res_count += 1 
 			else: 
-				final_result.append(p_fix[i][j])
-		fit_label = "Rabi: " + str(round(final_result[3]/2,3)) + "MHz\nPhonons: " + str(round(final_result[1],3)) + "\nDicke factor: " + str(round(final_result[0],3))
-
+				final_result.append([p_fix[i][j], 0, full_Rabi(phase, res.x, p_fix = p_fix[i], m = m)])
+		fit_label = "Rabi: " + str(round(final_result[3][0]/2,3)) + "MHz\nPhonons: " + str(round(final_result[1][0],3)) + "\nDicke factor: " + str(round(final_result[0][0],3))
 		fitdomain = np.linspace(phase[0], phase[-1], 1000)
-		ax.plot(fitdomain, full_Rabi(fitdomain, res.x, p_fix = p_fix[i], m = m), c = colours[i], label = fit_label)
+		if color is not None:
+			ax.plot(fitdomain, full_Rabi(fitdomain, res.x, p_fix = p_fix[i], m = m), c = color[i], label = fit_label)
+		else:
+			ax.plot(fitdomain, full_Rabi(fitdomain, res.x, p_fix = p_fix[i], m = m), c = colours[i], label = fit_label)
+
 		#ax.plot(fitdomain, full_Rabi(fitdomain, initial_fit[i]), c = 'k')
 		fit_values.append(final_result)
-		print("COM Frequency (MHz): ",COM_freq(final_result[0])/1e6)
+		print("COM Frequency (MHz): ",COM_freq(final_result[0][0])/1e6)
 
 	ax.legend()
 	ax.set_title('Rabi Flops')
