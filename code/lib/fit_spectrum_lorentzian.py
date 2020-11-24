@@ -1,4 +1,5 @@
-"""This function fits lorentzians to spectral peaks
+"""This function fits lorentzians to spectral peaks. 
+Maybe I should generalise multiple peak fitting?
 """
 ##-------------------------------PREAMBLE-----------------------------------##
 import matplotlib.pyplot as plt
@@ -28,7 +29,7 @@ def res_multi_lorentzian(params, x_data, y_data):
     diff = [ multi_lorentzian( x, params ) - y for x, y in zip( x_data, y_data )]
     return diff
 
-def spectrum_lorentzian_fitter(freq, probs, dprobs,initial_parameters, labels = None):
+def fit_spectrum_lorentzian(freq, probs, dprobs,initial_parameters, labels = None):
     """
     Capable of fitting/plotting for multiple spectra, so inputs
     should be array like

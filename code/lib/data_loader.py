@@ -1,20 +1,17 @@
-"""Info
+"""This function is responsible for loading mulitple sets of data into
+TricsDataObjects.
 """
 ##----------------------------PREAMBLE----------------------------------##
 import numpy as np
 import matplotlib.pyplot as plt
-from . import TricsDataObject
+#external dependencies
 
-##----------------------------PARAMETERS----------------------------------##
-#data_dir_trics = "zidshare.uibk.ac.at/qos/qfc/measurements/trics_data/"
-data_dir_trics = 'C:/Users/James/OneDrive - OnTheHub - The University of Oxford/phd/data/'
-
-data_folders = ["171718/"]
-filenames = ["PMT1_1.txt","PMT1_2.txt"]
+from lib import TricsDataObject
+#internal imports
 
 ##----------------------------MAIN----------------------------------##
 
-def data_loader(filenames = filenames, data_folders = data_folders, data_dir_trics = data_dir_trics, data_column = 6):
+def data_loader(filenames, data_folders, data_dir_trics, data_column = 6):
     """The point of data_loader is to return an array of trics object for different sets of data, rather
     than doing each one manually.
     """
@@ -25,15 +22,9 @@ def data_loader(filenames = filenames, data_folders = data_folders, data_dir_tri
 
     for n,folder in enumerate(data_folders,0):
     	for m,file in enumerate(filenames,0):
+
     		#create object
             trics_data_object = TricsDataObject(data_dir_trics + folder + file, data_column)
             data_objects[n,m] = trics_data_object
 
     return data_objects
-
-if __name__ == "__main__":
-    objects_array = data_loader()
-    for object_folders in objects_array:
-        for object in object_folders:
-            object.histogram_plot()
-            plt.show()

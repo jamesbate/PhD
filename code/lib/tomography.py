@@ -1,3 +1,5 @@
+"""This file contains functions useful for state tomography  
+"""
 ##---------------------------PREAMBLE-----------------------------------------##
 from qutip import expect, sigmax, sigmaz, sigmay, qeye, tensor
 import numpy as np
