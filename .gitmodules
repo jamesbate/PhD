@@ -1,0 +1,6 @@
+[submodule "code/CaviPy2/cavipy"]
+	path = code/CaviPy2/cavipy
+	url = git@git.uibk.ac.at:exphys/qig/software/simulations/cavipy.git
+[submodule "code/CaviPy/cavipy"]
+	path = code/CaviPy/cavipy
+	url = git@git.uibk.ac.at:exphys/qig/software/simulations/cavipy.git
